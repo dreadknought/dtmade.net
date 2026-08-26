@@ -28,7 +28,7 @@
 
   "vars": {
     "TURNSTILE_SITE_KEY": "REPLACE_WITH_TURNSTILE_SITE_KEY",
-    "LEAD_EMAIL_TO": "quotes@example.com",
+    "LEAD_EMAIL_TO": "signs@dtmade.net",
     "LEAD_EMAIL_FROM": "quotes@example.com",
     "BUSINESS_NAME": "Your Sign & Print Shop"
   }

@@ -130,3 +130,8 @@ Likely next iterations:
 ## Accessibility target
 
 The frontend is authored toward WCAG 2.2 Level AA. It includes semantic landmarks and headings, a skip link, keyboard-operable navigation and filters, visible focus states, reduced-motion support, accessible form labels and error summaries, descriptive portfolio image alt text, 44px-class interactive targets, and contrast-safe text colors. Automated testing is useful but does not replace manual keyboard and assistive-technology testing.
+
+
+## Branding assets
+
+The supplied Dahntahn Made SVG is stored at `public/assets/brand/dahntahn-made.svg` and used in the header/footer. Favicon assets are generated from the same mark: `favicon.svg`, `favicon.ico`, `favicon-32x32.png`, and `apple-touch-icon.png`.
