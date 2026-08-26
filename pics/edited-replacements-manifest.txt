@@ -1,0 +1,17 @@
+Archive contents: all renamed project photos, with selected files replaced by edited web-friendly versions.
+
+Edited replacements:
+- tyler-productions-storefront-window-graphics.jpg <- a_crisp_daytime_street_level_photo_of_a_storefront_1_batch_1.png
+- dahntahn-hemp-co-customer-parking-sign.jpg <- a_straight_on_well_lit_outdoor_scene_of_a_tall_ve_2_batch_2.png
+- dahntahn-hemp-co-dimensional-letter-sign-right-angle.jpg <- a_sharp_daylight_exterior_storefront_photo._overa_4_batch_4.png
+- dahntahn-hemp-co-pittsburgh-bridge-wall-graphic-close.jpg <- a_straight_on_well_lit_photograph_of_a_large_prin_5_batch_5.png
+- dahntahn-hemp-co-pittsburgh-bridge-wall-graphic-context.jpg <- a_well_lit_interior_storefront_entry_scene_photog_6_batch_6.png
+- ghost-rolls-retail-wall-graphic-angle-1.jpg <- a_bright_indoor_retail_store_scene_photographed_s_9_batch_9.png
+- stay-ghostly-retail-wall-graphic-wide.jpg <- wide_interior_retail_display_scene_a_clean_store_8_batch_8.png
+
+Unedited files retained from the prior renamed archive:
+- dahntahn-hemp-co-dimensional-letter-sign-left-angle.jpg
+- dahntahn-hemp-co-window-graphic.jpg
+- ghost-rolls-retail-wall-graphic-angle-2.jpg
+- ghost-rolls-retail-wall-graphic-front.jpg
+- stay-ghostly-retail-wall-graphic-close.jpg

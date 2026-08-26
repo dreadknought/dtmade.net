@@ -125,3 +125,8 @@ Likely next iterations:
 - privacy policy / terms
 - analytics + ad conversion events
 - stricter file signature checks if accepting arbitrary production artwork
+
+
+## Accessibility target
+
+The frontend is authored toward WCAG 2.2 Level AA. It includes semantic landmarks and headings, a skip link, keyboard-operable navigation and filters, visible focus states, reduced-motion support, accessible form labels and error summaries, descriptive portfolio image alt text, 44px-class interactive targets, and contrast-safe text colors. Automated testing is useful but does not replace manual keyboard and assistive-technology testing.

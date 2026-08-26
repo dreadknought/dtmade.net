@@ -1,141 +1,17 @@
-let config = null;
-let turnstileWidgetId = null;
 
-document.addEventListener("DOMContentLoaded", async () => {
-  const form = document.querySelector("#quote-form");
-  const service = document.querySelector("#service");
-  const sourcePath = document.querySelector("#source-path");
-
-  sourcePath.value = location.pathname + location.search;
-
-  document.querySelectorAll("[data-service]").forEach((link) => {
-    link.addEventListener("click", () => {
-      service.value = link.dataset.service || "";
-    });
-  });
-
-  try {
-    const response = await fetch("/api/config", { headers: { "Accept": "application/json" } });
-    config = await response.json();
-    renderTurnstileWhenReady(config.turnstileSiteKey);
-  } catch {
-    setStatus("Unable to load the quote form security check. Please refresh the page.", true);
-  }
-
-  form.addEventListener("submit", submitQuote);
-});
-
-function renderTurnstileWhenReady(siteKey) {
-  if (!siteKey || siteKey.startsWith("REPLACE_")) {
-    setStatus("Turnstile is not configured yet.", true);
-    return;
-  }
-
-  const attempt = () => {
-    if (window.turnstile) {
-      turnstileWidgetId = window.turnstile.render("#turnstile-container", {
-        sitekey: siteKey,
-        action: "quote_request",
-        theme: "light"
-      });
-      return;
-    }
-    setTimeout(attempt, 100);
-  };
-
-  attempt();
-}
-
-async function submitQuote(event) {
-  event.preventDefault();
-
-  const form = event.currentTarget;
-  const submitButton = document.querySelector("#submit-button");
-  const files = [...document.querySelector("#artwork").files];
-
-  if (!form.reportValidity()) return;
-
-  const fileError = validateFiles(files);
-  if (fileError) {
-    setStatus(fileError, true);
-    return;
-  }
-
-  const token = window.turnstile && turnstileWidgetId !== null
-    ? window.turnstile.getResponse(turnstileWidgetId)
-    : "";
-
-  if (!token) {
-    setStatus("Please complete the security check.", true);
-    return;
-  }
-
-  submitButton.disabled = true;
-  submitButton.textContent = "Sending…";
-  setStatus("Uploading files and saving your request…");
-
-  try {
-    const data = new FormData(form);
-    data.set("cf-turnstile-response", token);
-
-    const response = await fetch("/api/quote", {
-      method: "POST",
-      body: data,
-      headers: { "Accept": "application/json" }
-    });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      throw new Error(result.error || "Unable to submit quote request.");
-    }
-
-    form.hidden = true;
-    const panel = document.querySelector("#success-panel");
-    panel.hidden = false;
-    document.querySelector("#lead-id").textContent = `Reference: ${result.leadId}`;
-
-    if (!result.notificationSent) {
-      panel.insertAdjacentHTML(
-        "beforeend",
-        "<p><strong>Your request is saved.</strong> The email notification had a problem, so we can still recover the lead from the database.</p>"
-      );
-    }
-  } catch (error) {
-    setStatus(error.message || "Something went wrong. Please try again.", true);
-    if (window.turnstile && turnstileWidgetId !== null) {
-      window.turnstile.reset(turnstileWidgetId);
-    }
-  } finally {
-    submitButton.disabled = false;
-    submitButton.textContent = "Send Quote Request";
-  }
-}
-
-function validateFiles(files) {
-  if (!config) return null;
-  if (files.length > config.maxFiles) return `Please choose no more than ${config.maxFiles} files.`;
-
-  let total = 0;
-  for (const file of files) {
-    total += file.size;
-    if (file.size > config.maxFileBytes) {
-      return `${file.name} is larger than ${formatBytes(config.maxFileBytes)}.`;
-    }
-  }
-  if (total > config.maxTotalBytes) {
-    return `Total upload size must be under ${formatBytes(config.maxTotalBytes)}.`;
-  }
-  return null;
-}
-
-function setStatus(message, isError = false) {
-  const status = document.querySelector("#form-status");
-  status.textContent = message || "";
-  status.classList.toggle("error", isError);
-}
-
-function formatBytes(bytes) {
-  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
-  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
-}
+let config=null;let turnstileWidgetId=null;
+document.addEventListener('DOMContentLoaded',async()=>{setupMenu();setupFilters();setupProjectDialog();setupServiceLinks();setupForm();document.querySelector('#source-path').value=location.pathname+location.search;try{const r=await fetch('/api/config',{headers:{Accept:'application/json'}});if(!r.ok)throw new Error();config=await r.json();renderTurnstileWhenReady(config.turnstileSiteKey)}catch{setStatus('Unable to load the security check. Please refresh the page.',true)}});
+function setupMenu(){const b=document.querySelector('#menu-button'),n=document.querySelector('#mobile-nav'),l=document.querySelector('#menu-button-label');const close=()=>{b.setAttribute('aria-expanded','false');n.hidden=true;l.textContent='Open menu'};b.addEventListener('click',()=>{const open=b.getAttribute('aria-expanded')==='true';b.setAttribute('aria-expanded',String(!open));n.hidden=open;l.textContent=open?'Open menu':'Close menu';if(!open)n.querySelector('a')?.focus()});n.querySelectorAll('a').forEach(a=>a.addEventListener('click',close));document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!n.hidden){close();b.focus()}})}
+function setupFilters(){const buttons=[...document.querySelectorAll('.filter-button')],projects=[...document.querySelectorAll('.project')],status=document.querySelector('#gallery-status');buttons.forEach(b=>b.addEventListener('click',()=>{buttons.forEach(x=>{x.classList.toggle('is-active',x===b);x.setAttribute('aria-pressed',String(x===b))});const f=b.dataset.filter;let count=0;projects.forEach(p=>{const show=f==='all'||p.dataset.category===f;p.hidden=!show;if(show)count++});status.textContent=`Showing ${count} project${count===1?'':'s'}${f==='all'?'.':` in ${b.textContent}.`}`}))}
+function setupProjectDialog(){const dialog=document.querySelector('#project-dialog');if(!dialog)return;const image=document.querySelector('#project-dialog-image');const category=document.querySelector('#project-dialog-category');const title=document.querySelector('#project-dialog-title');const closeBtn=document.querySelector('#project-dialog-close');let lastTrigger=null;document.querySelectorAll('.project-open').forEach(button=>button.addEventListener('click',()=>{lastTrigger=button;image.src=button.dataset.image;image.alt=button.dataset.alt||'';category.textContent=button.dataset.categoryLabel||'';title.textContent=button.dataset.title||'';if(typeof dialog.showModal==='function'){dialog.showModal()}else{dialog.setAttribute('open','open')}closeBtn.focus()}));const closeDialog=()=>{if(dialog.open)dialog.close();else dialog.removeAttribute('open');lastTrigger?.focus()};closeBtn.addEventListener('click',closeDialog);dialog.addEventListener('click',e=>{if(e.target===dialog)closeDialog()});dialog.addEventListener('cancel',e=>{e.preventDefault();closeDialog()})}
+function setupServiceLinks(){const select=document.querySelector('#service');document.querySelectorAll('[data-service]').forEach(link=>link.addEventListener('click',()=>{select.value=link.dataset.service||''}))}
+function setupForm(){const f=document.querySelector('#quote-form');f.addEventListener('submit',submitQuote);['service','name','email','phone','project-details'].forEach(id=>document.querySelector('#'+id)?.addEventListener('input',clearFieldError))}
+function renderTurnstileWhenReady(siteKey){if(!siteKey||siteKey.startsWith('REPLACE_')){setStatus('Turnstile is not configured yet.',true);return}const go=()=>{if(window.turnstile){turnstileWidgetId=window.turnstile.render('#turnstile-container',{sitekey:siteKey,action:'quote_request',theme:'light'});return}setTimeout(go,100)};go()}
+async function submitQuote(e){e.preventDefault();const f=e.currentTarget,btn=document.querySelector('#submit-button');clearErrors();const errors=validateForm(f);if(errors.length){showErrors(errors);return}const files=[...document.querySelector('#artwork').files],fileError=validateFiles(files);if(fileError){showErrors([{id:'artwork',message:fileError}]);return}const token=window.turnstile&&turnstileWidgetId!==null?window.turnstile.getResponse(turnstileWidgetId):'';if(!token){showErrors([{id:'turnstile-container',message:'Please complete the security check.'}]);return}btn.disabled=true;btn.setAttribute('aria-busy','true');btn.firstChild.textContent='Sending… ';setStatus('Uploading files and saving your request…');try{const data=new FormData(f);data.set('cf-turnstile-response',token);const r=await fetch('/api/quote',{method:'POST',body:data,headers:{Accept:'application/json'}});const result=await r.json();if(!r.ok)throw new Error(result.error||'Unable to submit quote request.');f.hidden=true;const panel=document.querySelector('#success-panel');panel.hidden=false;document.querySelector('#lead-id').textContent=`Reference: ${result.leadId}`;if(!result.notificationSent){panel.insertAdjacentHTML('beforeend','<p><strong>Your request is saved.</strong> The notification email had a problem, but the lead is safely stored.</p>')}panel.focus()}catch(err){setStatus(err.message||'Something went wrong. Please try again.',true);if(window.turnstile&&turnstileWidgetId!==null)window.turnstile.reset(turnstileWidgetId)}finally{btn.disabled=false;btn.removeAttribute('aria-busy');btn.firstChild.textContent='Send project details '}}
+function validateForm(f){const specs=[['service','Please select a service.'],['name','Please enter your name.'],['email','Please enter a valid email address.'],['phone','Please enter your phone number.'],['project-details','Please describe your project.']];const errors=[];for(const[id,msg]of specs){const el=document.querySelector('#'+id);if(!el.checkValidity()||!String(el.value).trim())errors.push({id,message:msg})}return errors}
+function validateFiles(files){if(!config)return null;if(files.length>config.maxFiles)return`Please choose no more than ${config.maxFiles} files.`;let total=0;for(const file of files){total+=file.size;if(file.size>config.maxFileBytes)return`${file.name} is larger than ${formatBytes(config.maxFileBytes)}.`}if(total>config.maxTotalBytes)return`Total upload size must be under ${formatBytes(config.maxTotalBytes)}.`;return null}
+function showErrors(errors){const summary=document.querySelector('#form-error-summary'),ul=summary.querySelector('ul');ul.replaceChildren();errors.forEach(({id,message})=>{const el=document.querySelector('#'+id),field=el?.closest('.field,.file-field');if(field)field.classList.add('has-error');if(el){el.setAttribute('aria-invalid','true');const err=document.querySelector(`#${id}-error`);if(err){err.textContent=message;const existing=el.getAttribute('aria-describedby')||'';if(!existing.includes(err.id))el.setAttribute('aria-describedby',`${existing} ${err.id}`.trim())}}const li=document.createElement('li'),a=document.createElement('a');a.href='#'+id;a.textContent=message;a.addEventListener('click',()=>setTimeout(()=>el?.focus(),0));li.append(a);ul.append(li)});summary.hidden=false;summary.focus();setStatus('')}
+function clearErrors(){const s=document.querySelector('#form-error-summary');s.hidden=true;s.querySelector('ul').replaceChildren();document.querySelectorAll('.has-error').forEach(x=>x.classList.remove('has-error'));document.querySelectorAll('[aria-invalid="true"]').forEach(x=>x.removeAttribute('aria-invalid'));document.querySelectorAll('.field-error').forEach(x=>x.textContent='')}
+function clearFieldError(e){const el=e.currentTarget;el.removeAttribute('aria-invalid');el.closest('.field,.file-field')?.classList.remove('has-error');const err=document.querySelector(`#${el.id}-error`);if(err)err.textContent=''}
+function setStatus(message,isError=false){const s=document.querySelector('#form-status');s.textContent=message||'';s.dataset.error=isError?'true':'false'}
+function formatBytes(bytes){if(bytes<1024*1024)return`${Math.round(bytes/1024)} KB`;return`${(bytes/1024/1024).toFixed(1)} MB`}

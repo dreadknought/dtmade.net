@@ -4,10 +4,10 @@ const MAX_TOTAL_BYTES = 40 * 1024 * 1024;
 
 const ALLOWED_SERVICES = new Set([
   "business-signs",
-  "vehicle-graphics",
-  "banners",
+  "wall-window-graphics",
+  "banners-displays",
   "decals",
-  "printing",
+  "large-format-printing",
   "other"
 ]);
 
@@ -330,10 +330,10 @@ async function hashValue(value) {
 function serviceLabel(value) {
   return {
     "business-signs": "Business Signs",
-    "vehicle-graphics": "Vehicle Graphics",
-    "banners": "Banners",
+    "wall-window-graphics": "Window & Wall Graphics",
+    "banners-displays": "Banners, Displays & Event Graphics",
     "decals": "Decals & Stickers",
-    "printing": "Printing",
+    "large-format-printing": "Large-Format Printing",
     "other": "Something Else"
   }[value] || value;
 }
