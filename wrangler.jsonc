@@ -1,35 +1,36 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "sign-shop-funnel",
+  "name": "dahntahn-made",
   "main": "src/worker.js",
   "compatibility_date": "2026-08-22",
-
   "assets": {
     "directory": "./public",
     "binding": "ASSETS",
     "run_worker_first": ["/api/*"]
   },
-
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "sign-shop-leads",
-      "database_id": "REPLACE_WITH_D1_DATABASE_ID",
-      "migrations_dir": "migrations"
+      "database_name": "dahntahn-made-leads",
+      "database_id": "7b701c35-b5f9-4c43-bdcc-78be26a23153"
     }
   ],
-
   "r2_buckets": [
     {
-      "binding": "ARTWORK",
-      "bucket_name": "sign-shop-artwork"
+      "bucket_name": "dahntahn-made-artwork",
+      "binding": "ARTWORK"
     }
   ],
-
   "vars": {
-    "TURNSTILE_SITE_KEY": "REPLACE_WITH_TURNSTILE_SITE_KEY",
+    "TURNSTILE_SITE_KEY": "0x4AAAAAAEdOzr_sd_HH5fdK",
     "LEAD_EMAIL_TO": "signs@dtmade.net",
-    "LEAD_EMAIL_FROM": "quotes@example.com",
-    "BUSINESS_NAME": "Your Sign & Print Shop"
-  }
+    "LEAD_EMAIL_FROM": "quotes@dtmade.net",
+    "BUSINESS_NAME": "Dahntahn Made",
+    "SITE_URL": "https://dtmade.net",
+    "ARTWORK_LINK_TTL_SECONDS": "2592000"
+  },
+  "routes": [
+    {"pattern": "dtmade.net", "custom_domain": true},
+    {"pattern": "www.dtmade.net", "custom_domain": true}
+  ]
 }

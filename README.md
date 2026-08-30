@@ -135,3 +135,47 @@ The frontend is authored toward WCAG 2.2 Level AA. It includes semantic landmark
 ## Branding assets
 
 The supplied Dahntahn Made SVG is stored at `public/assets/brand/dahntahn-made.svg` and used in the header/footer. Favicon assets are generated from the same mark: `favicon.svg`, `favicon.ico`, `favicon-32x32.png`, and `apple-touch-icon.png`.
+
+
+## Responsive / acknowledgement update
+
+- Quote acknowledgement now appears below the quote form in the right-hand contact column.
+- The completed form remains visible after submission, while the submit button changes to “Request sent” and is disabled to prevent duplicate submissions.
+- Added responsive layout tuning at 1100px, 900px, 720px, and 420px.
+- Portfolio changes from 3 columns to 2 columns to 1 column as viewport width narrows.
+- Service cards collapse from 3 columns to 2 and then 1.
+- Quote fields become single-column on mobile.
+- Hero CTAs become full-width on small screens.
+- Mobile project lightbox uses nearly full viewport width.
+- Turnstile now uses Cloudflare's `flexible` widget size for responsive layouts.
+- Form controls stay at 16px on narrow phones to avoid iOS zoom-on-focus behavior.
+
+
+## SEO
+
+The production build includes:
+
+- canonical URL for `https://dtmade.net/`
+- local-search-oriented title and meta description
+- Open Graph and Twitter/X social-sharing metadata
+- 1200x630 social preview image at `/assets/seo/dahntahn-made-og.jpg`
+- JSON-LD `LocalBusiness` structured data with real contact details and service catalog
+- `/robots.txt`
+- `/sitemap.xml`
+
+When additional standalone service or portfolio pages are added, add them to `sitemap.xml` and give each page a unique title, description, canonical URL, and structured data where appropriate.
+
+## Private artwork email links
+
+Artwork stays private in R2. Email notifications contain signed download links served by the Worker at `/api/artwork`.
+
+Create the signing secret once:
+
+```bash
+openssl rand -hex 32
+npx wrangler secret put ARTWORK_LINK_SECRET
+```
+
+Paste the generated random value when prompted. Links expire after 30 days by default (`ARTWORK_LINK_TTL_SECONDS=2592000`).
+
+The notification email subject is exactly `dtmade quote`.

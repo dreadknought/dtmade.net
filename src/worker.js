@@ -38,6 +38,10 @@ export default {
       return handleQuote(request, env);
     }
 
+    if (url.pathname === "/api/artwork" && request.method === "GET") {
+      return handleArtworkDownload(request, env);
+    }
+
     if (url.pathname.startsWith("/api/")) {
       return json({ error: "Not found." }, 404);
     }
@@ -249,9 +253,15 @@ async function sendLeadEmail(env, lead, files) {
   if (!env.RESEND_API_KEY) {
     throw new Error("RESEND_API_KEY is not configured");
   }
+  if (!env.ARTWORK_LINK_SECRET) {
+    throw new Error("ARTWORK_LINK_SECRET is not configured");
+  }
 
   const fileLines = files.length
-    ? files.map((f) => `• ${f.originalName} (${formatBytes(f.sizeBytes)})\n  R2: ${f.objectKey}`).join("\n")
+    ? (await Promise.all(files.map(async (f) => {
+        const url = await createArtworkLink(env, f.objectKey);
+        return `• ${f.originalName} (${formatBytes(f.sizeBytes)})\n  Download: ${url}`;
+      }))).join("\n")
     : "No artwork uploaded.";
 
   const text = [
@@ -285,7 +295,7 @@ async function sendLeadEmail(env, lead, files) {
       from: env.LEAD_EMAIL_FROM,
       to: [env.LEAD_EMAIL_TO],
       reply_to: lead.email,
-      subject: `Quote request: ${serviceLabel(lead.service)} — ${lead.name}`,
+      subject: "dtmade quote",
       text
     })
   });
@@ -293,6 +303,80 @@ async function sendLeadEmail(env, lead, files) {
   if (!response.ok) {
     throw new Error(`Email provider returned ${response.status}: ${await response.text()}`);
   }
+}
+
+async function handleArtworkDownload(request, env) {
+  if (!env.ARTWORK_LINK_SECRET) {
+    return json({ error: "Artwork links are not configured." }, 500);
+  }
+
+  const url = new URL(request.url);
+  const key = url.searchParams.get("key") || "";
+  const expires = Number(url.searchParams.get("expires") || 0);
+  const sig = url.searchParams.get("sig") || "";
+
+  if (!key || !expires || !sig) {
+    return json({ error: "Invalid artwork link." }, 400);
+  }
+
+  if (Date.now() > expires * 1000) {
+    return json({ error: "This artwork link has expired." }, 410);
+  }
+
+  const expected = await signArtworkLink(env.ARTWORK_LINK_SECRET, key, expires);
+  if (!timingSafeEqual(sig, expected)) {
+    return json({ error: "Invalid artwork link." }, 403);
+  }
+
+  const object = await env.ARTWORK.get(key);
+  if (!object) {
+    return json({ error: "Artwork not found." }, 404);
+  }
+
+  const headers = new Headers();
+  object.writeHttpMetadata(headers);
+  headers.set("Cache-Control", "private, no-store");
+  headers.set("X-Content-Type-Options", "nosniff");
+
+  const originalName = object.customMetadata?.originalName || key.split("/").pop() || "artwork";
+  headers.set("Content-Disposition", `attachment; filename*=UTF-8''${encodeURIComponent(originalName)}`);
+
+  return new Response(object.body, { headers });
+}
+
+async function createArtworkLink(env, key) {
+  const ttl = Number(env.ARTWORK_LINK_TTL_SECONDS || 2592000); // 30 days
+  const expires = Math.floor(Date.now() / 1000) + ttl;
+  const sig = await signArtworkLink(env.ARTWORK_LINK_SECRET, key, expires);
+  const base = (env.SITE_URL || "https://dtmade.net").replace(/\/$/, "");
+  const params = new URLSearchParams({ key, expires: String(expires), sig });
+  return `${base}/api/artwork?${params.toString()}`;
+}
+
+async function signArtworkLink(secret, key, expires) {
+  const cryptoKey = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+  const data = new TextEncoder().encode(`${key}\n${expires}`);
+  const signature = await crypto.subtle.sign("HMAC", cryptoKey, data);
+  return toBase64Url(new Uint8Array(signature));
+}
+
+function toBase64Url(bytes) {
+  let binary = "";
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+}
+
+function timingSafeEqual(a, b) {
+  if (a.length !== b.length) return false;
+  let mismatch = 0;
+  for (let i = 0; i < a.length; i++) mismatch |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return mismatch === 0;
 }
 
 async function cleanupUploads(env, uploaded) {
