@@ -179,3 +179,15 @@ npx wrangler secret put ARTWORK_LINK_SECRET
 Paste the generated random value when prompted. Links expire after 30 days by default (`ARTWORK_LINK_TTL_SECONDS=2592000`).
 
 The notification email subject is exactly `dtmade quote`.
+
+
+## v10 changes
+- Added T-Shirt Design & Printing service and SEO page.
+- Added tshirt-design-printing to quote form and Worker validation.
+- Updated LEAD_EMAIL_TO to ibuckman@dtmade.net.
+- Added service to sitemap and internal related-service links.
+
+
+## v12 service-page quote forms
+
+Every service page now includes the full quote form with its service preselected. Service-page quote CTAs scroll to the local form instead of navigating back to the homepage.

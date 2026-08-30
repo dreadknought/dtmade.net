@@ -8,6 +8,7 @@ const ALLOWED_SERVICES = new Set([
   "banners-displays",
   "decals",
   "large-format-printing",
+  "tshirt-design-printing",
   "other"
 ]);
 
@@ -418,6 +419,7 @@ function serviceLabel(value) {
     "banners-displays": "Banners, Displays & Event Graphics",
     "decals": "Decals & Stickers",
     "large-format-printing": "Large-Format Printing",
+    "tshirt-design-printing": "T-Shirt Design & Printing",
     "other": "Something Else"
   }[value] || value;
 }

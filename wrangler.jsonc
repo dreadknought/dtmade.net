@@ -23,7 +23,7 @@
   ],
   "vars": {
     "TURNSTILE_SITE_KEY": "0x4AAAAAAEdOzr_sd_HH5fdK",
-    "LEAD_EMAIL_TO": "signs@dtmade.net",
+    "LEAD_EMAIL_TO": "ibuckman@dtmade.net",
     "LEAD_EMAIL_FROM": "quotes@dtmade.net",
     "BUSINESS_NAME": "Dahntahn Made",
     "SITE_URL": "https://dtmade.net",
