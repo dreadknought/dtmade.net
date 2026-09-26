@@ -29,6 +29,9 @@
     "SITE_URL": "https://dtmade.net",
     "ARTWORK_LINK_TTL_SECONDS": "2592000"
   },
+  "triggers": {
+    "crons": ["0 14 * * *"]
+  },
   "routes": [
     {"pattern": "dtmade.net", "custom_domain": true},
     {"pattern": "www.dtmade.net", "custom_domain": true}
